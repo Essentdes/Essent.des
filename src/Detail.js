@@ -13,14 +13,14 @@ function Detail() {
   }
 
   // 프로젝트의 mode 정보 가져오기
-  const currentMode = project.mode || 'Des';
+  const currentMode = project.mode || 'Std';
 
   return (
     <div className="detail-container">
       <header className="header">
         <div className="logo" onClick={() => navigate('/')}>ESSENT.STUDIO</div>
         <div className="nav-switch">
-          <span className={currentMode === 'Des' ? 'active' : ''}>Des</span>
+          <span className={currentMode === 'Std' ? 'active' : ''}>Des</span>
           <span style={{margin:'0 4px', color: '#fff'}}>/</span>
           <span className={currentMode === 'Lab' ? 'active' : ''}>Lab</span>
         </div>

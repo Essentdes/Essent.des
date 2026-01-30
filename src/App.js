@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import Detail from './Detail';
+import emailjs from '@emailjs/browser';
 
 function MainPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState('Des'); 
+  const [mode, setMode] = useState('Std'); 
   const [category, setCategory] = useState('All Project');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [form, setForm] = useState({ name: '', content: '', email: '' });
   const [errors, setErrors] = useState({ name: '', content: '', email: '' });
@@ -27,29 +29,47 @@ function MainPage() {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); 
-    let newErrors = {};
+const handleSubmit = (e) => {
+  e.preventDefault(); 
+  let newErrors = {};
 
-    if (!form.name.trim()) newErrors.name = '* 필수 항목입니다.';
-    if (!form.content.trim()) newErrors.content = '* 필수 항목입니다.';
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
-    if (!form.email.trim()) newErrors.email = '* 필수 항목입니다.';
-    else if (!emailRegex.test(form.email)) newErrors.email = '* 올바른 이메일 형식이 아닙니다.'; 
+  if (!form.name.trim()) newErrors.name = '* 필수 항목입니다.';
+  if (!form.content.trim()) newErrors.content = '* 필수 항목입니다.';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+  if (!form.email.trim()) newErrors.email = '* 필수 항목입니다.';
+  else if (!emailRegex.test(form.email)) newErrors.email = '* 올바른 이메일 형식이 아닙니다.'; 
 
-    setErrors(newErrors);
+  setErrors(newErrors);
 
-    if (Object.keys(newErrors).length === 0) {
-      alert(`[전송 성공!]\n\n담당자: ${form.name}\n이메일: ${form.email}`);
+  if (Object.keys(newErrors).length === 0) {
+    const templateParams = {
+      from_name: form.name,
+      reply_to: form.email,
+      message: form.content
+    };
+
+    emailjs.send(
+      'service_kjp37ef',
+      'template_ps03fo8',              // ← 수정!
+      templateParams,
+      '4B-9egCPFKnE3sLzN'
+    )
+    .then(() => {
+      alert('문의가 성공적으로 전송되었습니다! 빠른 시일 내에 답변드리겠습니다.');
       setForm({ name: '', content: '', email: '' });
-    }
-  };
+    })
+    .catch((error) => {
+      console.error('EmailJS 오류:', error);
+      alert('전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    });
+  }
+};
 
   // Des 프로젝트들
   const desProjects = [
     { 
       id: 'des-1', 
-      mode: 'Des',
+      mode: 'Std',
       title: 'BBAR WORKS', 
       sub: '브랜드 패키지 디자인 리뉴얼', 
       height: '400px', 
@@ -62,7 +82,7 @@ function MainPage() {
     },
     { 
       id: 'des-2', 
-      mode: 'Des',
+      mode: 'Std',
       title: 'ENHYPEN PACKAGE', 
       sub: '앨범 아트워크 및 패키지', 
       height: '250px', 
@@ -75,7 +95,7 @@ function MainPage() {
     },
     { 
       id: 'des-3', 
-      mode: 'Des',
+      mode: 'Std',
       title: 'Brand Identity', 
       sub: '브랜드 아이덴티티', 
       height: '500px', 
@@ -88,7 +108,7 @@ function MainPage() {
     },
     { 
       id: 'des-4', 
-      mode: 'Des',
+      mode: 'Std',
       title: 'Poster Collection', 
       sub: '포스터 시리즈', 
       height: '350px', 
@@ -101,7 +121,7 @@ function MainPage() {
     },
     { 
       id: 'des-5', 
-      mode: 'Des',
+      mode: 'Std',
       title: 'Editorial Design', 
       sub: '편집 디자인', 
       height: '450px', 
@@ -114,7 +134,7 @@ function MainPage() {
     },
     { 
       id: 'des-6', 
-      mode: 'Des',
+      mode: 'Std',
       title: 'Character Design', 
       sub: '캐릭터 디자인', 
       height: '300px', 
@@ -132,6 +152,7 @@ function MainPage() {
     { 
       id: 'lab-1', 
       mode: 'Lab',
+      category: 'All Project', 
       title: 'Web Design Portfolio', 
       sub: '웹사이트 개발', 
       height: '400px', 
@@ -145,6 +166,7 @@ function MainPage() {
     { 
       id: 'lab-2', 
       mode: 'Lab',
+      category: '코드 한 입',
       title: 'React Component Library', 
       sub: '컴포넌트 라이브러리', 
       height: '300px', 
@@ -158,6 +180,7 @@ function MainPage() {
     { 
       id: 'lab-3', 
       mode: 'Lab',
+      category: 'All Project',
       title: 'App UI Concept', 
       sub: '앱 프로토타입', 
       height: '450px', 
@@ -171,6 +194,7 @@ function MainPage() {
     { 
       id: 'lab-4', 
       mode: 'Lab',
+      category: '코드 한 입',
       title: 'Animation Study', 
       sub: '애니메이션 실험', 
       height: '350px', 
@@ -184,7 +208,17 @@ function MainPage() {
   ];
 
   // 현재 모드에 따라 보여줄 프로젝트 선택
-  const currentProjects = mode === 'Des' ? desProjects : labProjects;
+  const currentProjects = mode === 'Std' ? desProjects : labProjects;
+  // 검색어로 필터링
+const searchFiltered = currentProjects.filter(project => 
+  project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  project.sub.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+// 카테고리로 필터링
+const filteredProjects = category === 'All Project' 
+  ? searchFiltered 
+  : searchFiltered.filter(project => project.category === category);
 
   // 프로젝트 카드 클릭 시 Detail 페이지로 이동 (mode 정보도 함께 전달)
   const handleCardClick = (project) => {
@@ -196,7 +230,7 @@ function MainPage() {
       <header className="header">
         <div className="logo" onClick={handleReset}>ESSENT.STUDIO</div>
         <div className="nav-switch">
-          <span className={mode === 'Des' ? 'active' : ''} onClick={() => setMode('Des')}>Des</span> 
+          <span className={mode === 'Std' ? 'active' : ''} onClick={() => setMode('Std')}>Std</span> 
           <span style={{color: '#fff', margin: '0 4px'}}>/</span> 
           <span className={mode === 'Lab' ? 'active' : ''} onClick={() => setMode('Lab')}>Lab</span>
         </div>
@@ -228,11 +262,11 @@ function MainPage() {
             <h1 style={{fontSize: '40px', fontWeight: '600', lineHeight:'1', margin: 0}}>
               {category}
             </h1>
-            <input type="text" placeholder="Search..." className="search-input" />
+            <input type="text" placeholder="Search..." className="search-input" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
 
           <div className="masonry-grid">
-            {currentProjects.map((project) => (
+            {filteredProjects.map((project) => (
               <div 
                 className="project-card" 
                 key={project.id}
