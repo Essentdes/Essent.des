@@ -20,7 +20,7 @@ function Detail() {
       <header className="header">
         <div className="logo" onClick={() => navigate('/')}>ESSENT.STUDIO</div>
         <div className="nav-switch">
-          <span className={currentMode === 'Std' ? 'active' : ''}>Des</span>
+          <span className={currentMode === 'Std' ? 'active' : ''}>Std</span>
           <span style={{margin:'0 4px', color: '#fff'}}>/</span>
           <span className={currentMode === 'Lab' ? 'active' : ''}>Lab</span>
         </div>
